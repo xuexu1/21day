@@ -1,0 +1,6 @@
+/* System fonts - no external fonts needed */
+@layer base {
+  body {
+    font-family: 'Segoe UI', 'Noto Sans SC', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  }
+}
