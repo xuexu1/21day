@@ -22,12 +22,15 @@ export default function App() {
     currentIndex,
     todayTotalCount,
     rememberedCount,
+    isExtraReview,
+    extraReviewCount,
     handleRemember,
     handleForgot,
     handleAddWord,
     handleDeleteWords,
     parseBatchImport,
     addImportedWords,
+    startExtraReview,
   } = useMemoryWords();
 
   const handleAddWordWithClose = (word: string, translation: string): boolean => {
@@ -154,6 +157,7 @@ export default function App() {
             todayTotalCount={todayTotalCount}
             onRemember={handleRemember}
             onForgot={handleForgot}
+            onReviewAgain={() => startExtraReview()}
             onOpenInput={() => setShowInputPage(true)}
             onOpenBatchImport={() => setShowBatchImport(true)}
           />

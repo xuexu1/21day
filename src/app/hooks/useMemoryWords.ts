@@ -23,19 +23,26 @@ export interface ImportCommitResult {
 export function useMemoryWords() {
   const [allWords, setAllWords] = useState<WordData[]>([]);
   const [todayWords, setTodayWords] = useState<WordData[]>([]);
+  const [todayWordsSnapshot, setTodayWordsSnapshot] = useState<WordData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [todayTotalCount, setTodayTotalCount] = useState(0);
   const [rememberedCount, setRememberedCount] = useState(0);
+  const [isExtraReview, setIsExtraReview] = useState(false);
+  const [extraReviewCount, setExtraReviewCount] = useState(0);
 
   // 初始化：加载单词数据
   useEffect(() => {
+    console.info(`当前域名: ${window.location.origin}`);
     const words = loadWords();
     setAllWords(words);
 
     const today = getTodayWords(words);
     setTodayWords(today);
+    setTodayWordsSnapshot(today);
     setTodayTotalCount(today.length);
     setRememberedCount(0);
+    setIsExtraReview(false);
+    setExtraReviewCount(0);
 
     console.log('初始化完成:', {
       allWordsCount: words.length,
@@ -47,6 +54,17 @@ export function useMemoryWords() {
   // 处理"记住"按钮点击
   const handleRemember = () => {
     if (currentIndex >= todayWords.length) return;
+
+    if (isExtraReview) {
+      if (currentIndex < todayWords.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setTodayWords([]);
+        setCurrentIndex(0);
+        setIsExtraReview(false);
+      }
+      return;
+    }
 
     const currentWord = todayWords[currentIndex];
     const updatedWord = markAsRemembered(currentWord);
@@ -76,6 +94,17 @@ export function useMemoryWords() {
   // 处理"忘记"按钮点击
   const handleForgot = () => {
     if (currentIndex >= todayWords.length) return;
+
+    if (isExtraReview) {
+      if (currentIndex < todayWords.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setTodayWords([]);
+        setCurrentIndex(0);
+        setIsExtraReview(false);
+      }
+      return;
+    }
 
     const currentWord = todayWords[currentIndex];
     const updatedWord = markAsForgotten(currentWord);
@@ -134,6 +163,9 @@ export function useMemoryWords() {
     updatedTodayWords.splice(currentIndex, 0, newWord);
     setTodayWords(updatedTodayWords);
     setTodayTotalCount(updatedTodayWords.length);
+    const updatedSnapshot = [...todayWordsSnapshot];
+    updatedSnapshot.splice(currentIndex, 0, newWord);
+    setTodayWordsSnapshot(updatedSnapshot);
 
     return true; // 返回true表示成功添加了单词
   };
@@ -147,6 +179,18 @@ export function useMemoryWords() {
     // 同时更新今日列表
     const updatedTodayWords = todayWords.filter(word => !wordIds.includes(word.id));
     setTodayWords(updatedTodayWords);
+    const updatedSnapshot = todayWordsSnapshot.filter(word => !wordIds.includes(word.id));
+    setTodayWordsSnapshot(updatedSnapshot);
+    // 清空回顾单词时，同步清空记忆卡片
+    if (wordIds.length > 0) {
+      setTodayWords([]);
+      setTodayWordsSnapshot([]);
+      setTodayTotalCount(0);
+      setCurrentIndex(0);
+      setIsExtraReview(false);
+    } else if (updatedSnapshot.length === 0) {
+      setIsExtraReview(false);
+    }
 
     // 如果当前索引超出范围，调整索引
     if (updatedTodayWords.length === 0) {
@@ -308,6 +352,9 @@ export function useMemoryWords() {
     updatedTodayWords.splice(insertIndex, 0, ...pendingWords);
     setTodayWords(updatedTodayWords);
     setTodayTotalCount(prevCount => prevCount + pendingWords.length);
+    const updatedSnapshot = [...todayWordsSnapshot];
+    updatedSnapshot.splice(insertIndex, 0, ...pendingWords);
+    setTodayWordsSnapshot(updatedSnapshot);
 
     // 如果之前列表为空，确保currentIndex是0
     if (todayWords.length === 0) {
@@ -317,17 +364,28 @@ export function useMemoryWords() {
     return { insertIndex, updatedTodayWords };
   };
 
+  const startExtraReview = () => {
+    if (todayWordsSnapshot.length === 0) return;
+    setIsExtraReview(true);
+    setExtraReviewCount(prev => prev + 1);
+    setTodayWords([...todayWordsSnapshot]);
+    setCurrentIndex(0);
+  };
+
   return {
     allWords,
     todayWords,
     currentIndex,
     todayTotalCount,
     rememberedCount,
+    isExtraReview,
+    extraReviewCount,
     handleRemember,
     handleForgot,
     handleAddWord,
     handleDeleteWords,
     parseBatchImport,
     addImportedWords,
+    startExtraReview,
   };
 }

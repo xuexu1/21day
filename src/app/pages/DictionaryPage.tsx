@@ -1,7 +1,9 @@
+import * as React from 'react';
 import { Layers } from 'lucide-react';
-import { MemoryCard } from '@/app/components/MemoryCard';
-import svgPaths from '@/imports/svg-zdr1glqli5';
-import { WordData } from '@/app/utils/memorySystem';
+import { MemoryCard } from '../components/MemoryCard';
+import { CompletionCard } from '../components/CompletionCard';
+import svgPaths from '../../imports/svg-zdr1glqli5';
+import { WordData } from '../utils/memorySystem';
 
 interface DictionaryPageProps {
   todayWords: WordData[];
@@ -10,6 +12,7 @@ interface DictionaryPageProps {
   todayTotalCount: number;
   onRemember: () => void;
   onForgot: () => void;
+  onReviewAgain?: () => void;
   onOpenInput: () => void;
   onOpenBatchImport: () => void;
 }
@@ -21,9 +24,43 @@ export function DictionaryPage({
   todayTotalCount,
   onRemember,
   onForgot,
+  onReviewAgain,
   onOpenInput,
   onOpenBatchImport,
 }: DictionaryPageProps) {
+  const hasTodayWords = todayTotalCount > 0;
+  const isCompleted = hasTodayWords && rememberedCount >= todayTotalCount && todayWords.length === 0;
+
+  const renderEmptyState = () => (
+    <div className="relative w-[310px] h-[315px]">
+      {/* 背景阴影卡片 */}
+      <div className="absolute flex h-[291.13px] items-center justify-center left-[6.66px] top-[-10.34px] w-[315.616px]">
+        <div className="flex-none rotate-[1.64deg]">
+          <div className="bg-[#bbc5e4] h-[282.442px] rounded-[14px] w-[307.66px]" />
+        </div>
+      </div>
+
+      {/* 前景白色卡片 */}
+      <div className="absolute bg-white rounded-[16px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.15)] inset-[0_0_30px_0] flex items-center justify-center">
+        <p
+          className="font-['Segoe_UI:Regular','Noto_Sans_SC:Regular',sans-serif] text-[clamp(14px,4vw,16px)] text-[#9ca3af]"
+          style={{ fontVariationSettings: "'wght' 400" }}
+        >
+          暂无任何单词
+        </p>
+      </div>
+
+      {/* 底部计数 */}
+      <div className="absolute bottom-0 h-[24px] left-0 w-[310px] flex items-center justify-center">
+        <p
+          className="font-['Segoe_UI:Regular','Noto_Sans_JP:Regular','Noto_Sans_SC:Regular',sans-serif] text-[#4e5969] text-[12px] text-center leading-[15px]"
+          style={{ fontVariationSettings: "'wght' 400" }}
+        >
+          今日0个词汇
+        </p>
+      </div>
+    </div>
+  );
   return (
     <div className="absolute top-[100px] bottom-[64px] left-0 right-0 overflow-auto flex flex-col items-center justify-center gap-8 px-[5%]">
       {/* Memory Card */}
@@ -36,29 +73,14 @@ export function DictionaryPage({
             onRemember={onRemember}
             onForgot={onForgot}
           />
+        ) : isCompleted ? (
+          <CompletionCard
+            rememberedCount={rememberedCount}
+            totalCount={todayTotalCount}
+            onReview={() => onReviewAgain?.()}
+          />
         ) : (
-          <div className="relative w-[310px] h-[315px]">
-            {/* 背景阴影卡片 */}
-            <div className="absolute flex h-[291.13px] items-center justify-center left-[6.66px] top-[-10.34px] w-[315.616px]">
-              <div className="flex-none rotate-[1.64deg]">
-                <div className="bg-[#bbc5e4] h-[282.442px] rounded-[14px] w-[307.66px]" />
-              </div>
-            </div>
-
-            {/* 前景白色卡片 */}
-            <div className="absolute bg-white rounded-[16px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.15)] inset-[0_0_30px_0] flex items-center justify-center">
-              <p className="font-['Segoe_UI:Regular','Noto_Sans_SC:Regular',sans-serif] text-[clamp(14px,4vw,16px)] text-[#9ca3af]" style={{ fontVariationSettings: "'wght' 400" }}>
-                暂无单词
-              </p>
-            </div>
-
-            {/* 底部计数 */}
-            <div className="absolute bottom-0 h-[24px] left-0 w-[310px] flex items-center justify-center">
-              <p className="font-['Segoe_UI:Regular','Noto_Sans_JP:Regular','Noto_Sans_SC:Regular',sans-serif] text-[#4e5969] text-[12px] text-center leading-[15px]" style={{ fontVariationSettings: "'wght' 400" }}>
-                今日0个词汇
-              </p>
-            </div>
-          </div>
+          renderEmptyState()
         )}
       </div>
 

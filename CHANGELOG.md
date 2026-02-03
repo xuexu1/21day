@@ -26,6 +26,10 @@ All notable changes to this project will be documented in this file.
 - Applied translation simplification only for sentence translation.
 - Added tests for review count thresholds.
 - Added tests to verify review counts after dedupe.
+- Switched repeat review to extra-review rounds without schedule changes.
+- Cleared memory card words when review words are cleared.
+- Split completion state from empty-word state in dictionary view.
+- Logged current origin during word load to help diagnose storage resets.
 
 ## 2026-01-30
 
