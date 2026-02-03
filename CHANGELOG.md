@@ -27,3 +27,10 @@ All notable changes to this project will be documented in this file.
 - Added tests for review count thresholds.
 - Added tests to verify review counts after dedupe.
 
+## 2026-01-30
+
+### Changed
+- Set Vite base to `/` for custom domain deployments.
+- Added GitHub Pages workflow to build and deploy `dist`.
+- Added `public/CNAME` for custom domain output.
+
