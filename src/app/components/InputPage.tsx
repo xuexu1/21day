@@ -21,6 +21,14 @@ export function InputPage({ onBack, onSubmit }: InputPageProps) {
     }
   };
 
+  // 打开输入页时默认聚焦，触发键盘
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      wordInputRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   // 监听单词输入变化，延迟0.3秒后搜索
   useEffect(() => {
     // 清除之前的定时器
